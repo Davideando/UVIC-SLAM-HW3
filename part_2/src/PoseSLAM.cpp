@@ -11,6 +11,9 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 
+// Library to read G2o files
+#include <gtsam/slam/dataset.h>
+
 using namespace std;
 using namespace gtsam;
 using namespace boost;
@@ -31,6 +34,19 @@ int main(int argc, char** argv) {
   Values initial;
 
   // Read from our manhattan dataset, in datasets/manhattan/Olson
+  // Create a variable to find the file
+  string g2oFile = "../datasets/manhattan/Olson/manhattanOlson3500.g2o"; // default
+
+  // Create variables to store the file nodes and values
+  NonlinearFactorGraph::shared_ptr file_graph;
+  Values::shared_ptr file_initial;
+
+  // Get the values, in 2D mode
+  tie(file_graph, file_initial) = readG2o(g2oFile, false);
+
+  // Asign the values to the variales
+  graph = *file_graph;
+  initial = *file_initial;
 
   // Loop over lines in dataset
   //// Insert vector values into the initial estimate data structure
@@ -38,12 +54,15 @@ int main(int argc, char** argv) {
 
   // Assign the non optimized values from the LevenbergMarquardtOptimizer to a Values type
   // Call Values type non_optimized_result
+  LevenbergMarquardtOptimizer optimizer(graph,initial);
+  Values non_optimized_result = optimizer.values();
   // Output non optimized graph to dot graph file
   ofstream non_optimized_dot_file("NonOptimizedGraph.dot");
   graph.saveGraph(non_optimized_dot_file, non_optimized_result);
 
   // Assign the optimized values from the LevenbergMarquardtOptimizer to a Values type
   // Call Values type optimized_result
+  Values optimized_result = optimizer.optimize();
   // Output optimized graph to dot graph file
   ofstream optimized_dot_file("OptimizedGraph.dot");
   graph.saveGraph(optimized_dot_file, optimized_result);
