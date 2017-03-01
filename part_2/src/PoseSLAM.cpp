@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
   graph = *file_graph;
   initial = *file_initial;
 
+  graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 0), priorNoise));
   // Loop over lines in dataset
   //// Insert vector values into the initial estimate data structure
   //// Insert edge values into the factor graph container
